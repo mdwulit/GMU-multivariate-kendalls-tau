@@ -1,5 +1,5 @@
 ---
-title: "Multidemensional Corelation Report"
+title: "Multivariate Kendal's Tau"
 author: "Marek Dwulit"
 date: "12/18/2016"
 output: pdf_document
@@ -10,7 +10,7 @@ output: pdf_document
 For simplicity we are assuming that the points are generated from continous distribution. In other words 
 we are assuming that there is not ties in any given dimension for all random vectors in data set.
 
-### Quarter Test 
+### Quarter Indexing 
 
 Lets assume that we have a one dimensional space. Graphically we can represent it as a line with defined 0.
 We have two halves and we can use binary system to indicate each half. Positive numbers are indicated by 1 and
@@ -100,4 +100,5 @@ names(crustM.df) = c("X","Y","Z")
 plot(crustM.df)
 print(dim(crustM.df))
 ```
+
 
