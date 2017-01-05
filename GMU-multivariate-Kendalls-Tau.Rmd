@@ -1,0 +1,103 @@
+---
+title: "Multidemensional Corelation Report"
+author: "Marek Dwulit"
+date: "12/18/2016"
+output: pdf_document
+---
+
+### Assumption
+
+For simplicity we are assuming that the points are generated from continous distribution. In other words 
+we are assuming that there is not ties in any given dimension for all random vectors in data set.
+
+### Quarter Test 
+
+Lets assume that we have a one dimensional space. Graphically we can represent it as a line with defined 0.
+We have two halves and we can use binary system to indicate each half. Positive numbers are indicated by 1 and
+negative numbers are indicated by 0. 
+
+```{r, out.width = "200px", echo=FALSE}
+knitr::include_graphics("Images/binary-one-dimension.png")
+```
+
+When we increease number of dimensions by one we have a plane devided into four quarters and we need two binary 
+numbers to index all quarters. 
+
+```{r, out.width = "200px", echo=FALSE}
+knitr::include_graphics("Images/binary-two-dimension.png")
+```
+
+In the case of three dimensional space we have eight "quarters" and we can index all quarters with three binary numbers.
+
+```{r, out.width = "200px", echo=FALSE}
+knitr::include_graphics("Images/binary-three-dimension.png")
+```
+
+The rule for indexing quarter is rather obvious. First we observe that the number of "Quarters" is equal to $2^d$, where
+d represents number of dimenstions. For each of the dimesions the value can be either bigger or smaller than zero (for 
+now we will ingore case when value is 0). Therefore we need one bit per each dimension to index position of the point in
+$d$ dimensial space. It is worth to notice that the index starts from 0 and ends at $2^d-1$
+
+Furthermore it is important to notice that for each "quarter" there is an oposite quarter where all bits are negated.
+
+
+
+```{r}
+R = matrix(cbind(1.000000, 0.1121, 0.851929,  
+                 0.112100, 1.0000, 0.140000,  
+                 0.851929, 0.1400, 1.000000),
+           nrow=3)
+U = t(chol(R))
+nvars = dim(U)[1]
+numobs = 100
+set.seed(1)
+random.normal = matrix(rnorm(nvars*numobs,0,1), nrow=nvars, ncol=numobs);
+X = U %*% random.normal
+newX = t(X)
+raw = as.data.frame(newX)
+orig.raw = as.data.frame(t(random.normal))
+names(raw) = c("X","Y","Z")
+cor(raw)
+plot(head(raw, numobs))
+```
+
+```{r}
+bintodec <- function(y) {
+  # find the decimal number corresponding to binary sequence 'y'
+  if (! (all(y %in% c(0,1)))) stop("not a binary sequence")
+  res <- sum(y*2^((length(y):1) - 1))
+  return(res)
+}
+
+crustM = c()
+
+for(i in 1:numobs) {
+  qrtVec = rep(0, 7)
+  for(k in 1:numobs) {
+    if (i != k) {
+      p =  newX[k,1:3] - newX[i,1:3]
+      if (sum(as.integer(p == 0)) == 0) {
+        p = as.integer(p < 0)
+        p = bintodec(p)
+        qrtVec[p] = 1
+      }
+    }
+  }
+  if (i %% 100 == 0) {
+    print(i)
+  }
+  if (bintodec(qrtVec) < 2^7-1) {
+    crustM <- cbind(crustM, newX[i,1:3])
+  }
+}
+
+crustM <- t(crustM)
+
+
+
+crustM.df = as.data.frame(crustM)
+names(crustM.df) = c("X","Y","Z")
+plot(crustM.df)
+print(dim(crustM.df))
+```
+
