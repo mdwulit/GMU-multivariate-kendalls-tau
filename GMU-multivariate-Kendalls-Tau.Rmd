@@ -135,38 +135,26 @@ bintodec <- function(y) {
 }
 
 crustM = c()
-qrtCount = rep(0, 7)
+qrtCount = rep(0, 8)
 
-for(i in 1:numobs) {
-  qrtVec = rep(0, 7)
-  for(k in 1:numobs) {
-    if (i != k) {
+for(i in 1:(numobs-1)) {
+  for(k in (i+1):numobs) {
       p =  newX[k,1:3] - newX[i,1:3]
-      if (sum(as.integer(p == 0)) == 0) {
-        p = as.integer(p < 0)
-        p = bintodec(p)
-        qrtVec[p] = 1
-        qrtCount[p] = qrtCount[p] + 1
-      }
-    }
-  }
-  if (i %% 100 == 0) {
-    print(i)
-  }
-  if (bintodec(qrtVec) < 2^7-1) {
-    crustM <- cbind(crustM, newX[i,1:3])
+      p = as.integer(p < 0)
+      p = bintodec(p)
+      qrtCount[p+1] = qrtCount[p+1] + 1
   }
 }
+```
 
-crustM <- t(crustM)
+Computed probabilites
 
-
-
-crustM.df = as.data.frame(crustM)
-names(crustM.df) = c("X","Y","Z")
-plot(crustM.df)
-print(dim(crustM.df))
+```{r}
 qrtCount
+
+qrtProb = qrtCount/choose(100, 2)
+
+qrtProb
 ```
 
 
