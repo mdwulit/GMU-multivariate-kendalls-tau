@@ -38,9 +38,74 @@ d represents number of dimenstions. For each of the dimesions the value can be e
 now we will ingore case when value is 0). Therefore we need one bit per each dimension to index position of the point in
 $d$ dimensial space. It is worth to notice that the index starts from 0 and ends at $2^d-1$
 
-Furthermore it is important to notice that for each "quarter" there is an oposite quarter where all bits are negated.
+Furthermore it is important to notice that for each "quarter", there is an oposite "quarter"" indicated by the oposite vector
+to a vector indicating point in a given quarter. By the nature of the binary indexing we can find the oposite quarter by performing the NOT operation on binary sequence indicating a given quarter. For a quarter marked by binary sequence $111$ (7 as an integer) the oposite quarter has index $000$ (0 as an integer).
 
+```{r, out.width = "200px", echo=FALSE}
+knitr::include_graphics("Images/binary-three-dimension-oposite-qtr.png")
+```
 
+### Locating two points in reference to eachother (identifying a quarter)
+
+Using "quarter indexing"" is an useful scheme. The scheme allows to identify relational position of two points 
+in a multidimensional space by indicating. As an example lets assume that we can have to vectors $\vec{x_1},\vec{x_2}$ indicating two points in the euclidan space.
+
+If we want to define position of of $x_2$ in reference to $x_1$ we have to execute following operations:
+
+1. $x_q=x_2-x_1$
+
+2. Replace all positive values in $x_q$ with 1 and all negative values with 0
+
+3. Translate binary sequence computed in previous step to decimal number
+
+As an example we will use $x_1=(3, 4, 1)^T$ and $x_2=(5, 6, 3)^T$. First we subtract vectors $x_q=x_2-x_1 = (2,2,2)^T$. Then we create binary sequence applying rule listed in step two, so we have binary sequence $111$. Finally we translate binary sequnce to decimal number and we get 7th quarter. So we can conclude that point $x_2$ is located in 7-th quarter in reference to point $x_1$. 
+By analogy if we check location of the point $x_1$ in reference to $x_2$ we will get quarter number 0 and we can conclude that the point $x_1$ is located in 0-th qarter in reference to point $x_2$.
+
+```{r, out.width = "300px", echo=FALSE}
+knitr::include_graphics("Images/binary-three-dimension-two-points-in-reference.png")
+```
+
+### Expressing Kendel's tau in terms of number of "quarters"
+
+Interestingly, assuming that distribution is continous, we can express Kendel's tau estimator using introduced above quarter concept. Kendal's tau estimator is expreseed as follows:
+
+(1)
+
+$$
+A_{ij}=sgn(X_i-X_j)*sgn(Y_i-Y_j) 
+$$ 
+
+where
+
+(2)
+
+$$
+  sgn(u)=\begin{cases}
+    1, & \text{if $u>0$}\\
+    0, & \text{if $u>0$}\\
+    -1, & \text{if $u<0$}
+  \end{cases}
+$$
+
+(3)
+
+$$
+  T=\frac{\sum_{i=1}^{i=n-1}\sum_{j=i+1}^{j=n} A_{ij}}{\binom{n}{2}}
+$$ 
+
+To see how we can use quarter concept to estimate T, we have to recognize the fact that the formula nr 1 returns 1 for quarters 0 (00) and 3 (11) and returns -1 for quarters 1 (01) and 2 (10). Therefore we can interpret the nominator from the formula number (3) as a difference out of all possible pairs of points, between number pairs having other point in quarters 0 or 3, and pairs having other point in quarter 1 or 2. 
+
+For the sake of simplicity we will refer to the two oposite quarters as a direction. So in $d$ dimensional space we have $2^{d-1}$ directions as per each direction we need two quarters. 
+
+### Short discussion
+
+Using concept of direction we can compute, out of all posible pairs, the number of points having
+other point in a given direction and devide it by the number of all possible pairs.
+The computed number would represent probability that a given pair of points will be in a given direction.
+Intuitive speculation is that directions are independent (they are orthogonal to eachother) and thereofore
+having vector of probabilites for each direction would reveal the nature of dataset in terms of monotnicity.
+
+\newpage
 
 ```{r}
 R = matrix(cbind(1.000000, 0.1121, 0.851929,  
@@ -70,6 +135,7 @@ bintodec <- function(y) {
 }
 
 crustM = c()
+qrtCount = rep(0, 7)
 
 for(i in 1:numobs) {
   qrtVec = rep(0, 7)
@@ -80,6 +146,7 @@ for(i in 1:numobs) {
         p = as.integer(p < 0)
         p = bintodec(p)
         qrtVec[p] = 1
+        qrtCount[p] = qrtCount[p] + 1
       }
     }
   }
@@ -99,6 +166,7 @@ crustM.df = as.data.frame(crustM)
 names(crustM.df) = c("X","Y","Z")
 plot(crustM.df)
 print(dim(crustM.df))
+qrtCount
 ```
 
 
