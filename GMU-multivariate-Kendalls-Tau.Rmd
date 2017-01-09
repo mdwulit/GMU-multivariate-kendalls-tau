@@ -1,18 +1,34 @@
 ---
 title: "Multivariate Kendal's Tau"
-author: "Marek Dwulit"
+author: 
+  - Marek Dwulit
+  - Magdalena Dwulit
 date: "12/18/2016"
 abstract: |
-  Kendell's $\tau$ is an excellent way to indicate .
+  In general, if $X$ and $Y$ bivariate probability distribution, the covariance is a one parameter which 
+  indicates the amount of association between variable $X$ and variable $Y$. The covariance will be high
+  and positive where there is hihgh probability that high values of $X$ are associated with high values
+  of $Y$ and low values of $X$ are associated with low values of $Y$. On the other hand the if the 
+  association is negative (high values of $X$ correspond to low values of $Y$ and low values of $X$ 
+  correspond to high values of $Y) the correlation will be large and negative.
+  
+  This short text is an attempt to look for a way to capture concordence for multivariate
+  probability distribution. In an nutshell, our method devides multidimensional space in to "quarters" and assigns 
+  probability that two points drawn randomly from a data set will point in a given direction. 
+  At the end of computation our method produces a vector of probabilites for eqch direction in multidimensional space.
+  
+  Finally this is a beggining of the work and the review is needed to established fisibility of proposed approach.
+  Based of the outcome further effor will be provided to better define concept and polish the text. As of right now this
+  document caputers more intuitive representation than formalized concepts.
 
-  It consists of two paragraphs.
+
 output: pdf_document
 ---
 
 ### Assumption
 
 For simplicity we are assuming that the points are generated from continous distribution. In other words 
-we are assuming that there is not ties in any given dimension for all random vectors in data set. The
+we are assuming that there is no ties in any given dimension for all random vectors in data set. The
 further work is needed to extend presented below concept in order to account for ties.
 
 ### Quarter Indexing 
@@ -106,9 +122,17 @@ For the sake of simplicity we will refer to the two oposite quarters as a direct
 
 Using concept of direction we can compute, out of all posible pairs, the number of points having
 other point in a given direction and devide it by the number of all possible pairs.
-The computed number would represent probability that a given pair of points will be in a given direction.
+The computed number would represent probability that a given pair of points will establish a given direction.
 Intuitive speculation is that directions are independent (they are orthogonal to eachother) and thereofore
 having vector of probabilites for each direction would reveal the nature of dataset in terms of monotnicity.
+
+Furthermore if we assume that under $H_0$ there is no monotonicity present we know that for each pair, each of the direction is 
+eqally likely. Threfore we know the probability distribution under $H_0$. So we can construct a test computing the p-value
+for the vector of probabilites computed based on a given sample. Assuming that this pass the review the further work is 
+necessary to construct the proper test.
+
+Other aspect worth further investigation is to the problem of interpretation. Resulting vector of probabilites is a weak indicator,
+meaning one has to put allot of effort to build intuition to interpret properly computed vector of probabilites. In other words the utility of the propose method is low. Therefore more work has to be done on making computed results more intuition firendly.
 
 ```{r, echo=FALSE}
 R = matrix(cbind(1.000000, -0.7, 0.951929,  
@@ -192,8 +216,8 @@ qrtCountNoTrnsf
 qrtProbNoTrnsf = qrtCountNoTrnsf/choose(numobs, 2)
 qrtProbNoTrnsf
 
-cor(newX)
-cor(t(X))
+cor(newX, method = c("kendall"))
+cor(newX, method = c("pearson"))
 ```
 
 Tau matrix
@@ -205,20 +229,20 @@ Tau matrix
       if (qrtCount[i]+qrtCount[j] == 0)
         tauMat[i,j] <- 0
       else
-        tauMat[i,j] <- (qrtCount[i]-qrtCount[j])/(qrtCount[i]+qrtCount[j])
+        tauMat[i,j] <- (qrtCount[i]-qrtCount[j])/choose(numobs, 2)
     }
   }
 ```
 
 ```{r results='asis', echo=FALSE}
-df <- as.data.frame(tauMat)
-names(df)[names(df) == 'V1'] <- paste(tail(rev(as.integer(intToBits(0))),2),collapse = "")
-names(df)[names(df) == 'V2'] <- paste(tail(rev(as.integer(intToBits(1))),2),collapse = "")
-names(df)[names(df) == 'V3'] <- paste(tail(rev(as.integer(intToBits(2))),2),collapse = "")
-names(df)[names(df) == 'V4'] <- paste(tail(rev(as.integer(intToBits(3))),2),collapse = "")
-
-
-library(knitr)
-out <- kable(df,format="markdown", align = 'c')
-cat(gsub('\\bNaN\\b', '  ', out), sep='\n')
+# df <- as.data.frame(tauMat)
+# names(df)[names(df) == 'V1'] <- paste(tail(rev(as.integer(intToBits(0))),2),collapse = "")
+# names(df)[names(df) == 'V2'] <- paste(tail(rev(as.integer(intToBits(1))),2),collapse = "")
+# names(df)[names(df) == 'V3'] <- paste(tail(rev(as.integer(intToBits(2))),2),collapse = "")
+# names(df)[names(df) == 'V4'] <- paste(tail(rev(as.integer(intToBits(3))),2),collapse = "")
+# 
+# 
+# library(knitr)
+# out <- kable(df,format="markdown", align = 'c')
+# cat(gsub('\\bNaN\\b', '  ', out), sep='\n')
 ```
