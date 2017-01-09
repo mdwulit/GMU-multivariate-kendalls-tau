@@ -13,13 +13,13 @@ abstract: |
   correspond to high values of $Y) the correlation will be large and negative.
   
   This short text is an attempt to look for a way to capture concordence for multivariate
-  probability distribution. In an nutshell, our method devides multidimensional space in to "quarters" and assigns 
+  probability distribution. In a nutshell, our method devides multidimensional space in to "quarters" and assigns 
   probability that two points drawn randomly from a data set will point in a given direction. 
   At the end of computation our method produces a vector of probabilites for eqch direction in multidimensional space.
   
   Finally this is a beggining of the work and the review is needed to established fisibility of proposed approach.
   Based of the outcome further effor will be provided to better define concept and polish the text. In the current state
-  this document captuers has intuitive representation rather than formalized concepts.
+  this document captuers intuitive representation rather than formalized concepts.
 
 
 output: pdf_document
@@ -71,7 +71,7 @@ knitr::include_graphics("Images/binary-three-dimension-oposite-qtr.png")
 ### Locating two points in reference to eachother (identifying a quarter)
 
 Using "quarter indexing"" is an useful scheme. The scheme allows to identify relational position of two points 
-in a multidimensional space by indicating. As an example lets assume that we can have to vectors $\vec{x_1},\vec{x_2}$ indicating two points in the euclidan space.
+in a multidimensional space by indicating a direction. As an example lets assume that we can have to vectors $\vec{x_1},\vec{x_2}$ indicating two points in the euclidan space.
 
 If we want to define position of of $x_2$ in reference to $x_1$ we have to execute following operations:
 
@@ -127,7 +127,7 @@ Intuitive speculation is that directions are independent (they are orthogonal to
 having vector of probabilites for each direction would reveal the nature of dataset in terms of monotnicity.
 
 Furthermore if we assume that under $H_0$ there is no monotonicity present we know that for each pair, each of the direction is 
-eqally likely. Threfore we know the probability distribution under $H_0$. So we can construct a test computing the p-value
+eqally likely. Threfore we know the probability distribution under $H_0$. So we can construct a test an compute the p-value
 for the vector of probabilites computed based on a given sample. Assuming that this pass the review the further work is 
 necessary to construct the proper test.
 
@@ -137,10 +137,9 @@ meaning one has to put allot of effort to build intuition to interpret properly 
 
 ### Performance against artificial dataset
 
-Below it will be perfomed the computetion to prove above theory.
-For that purpose there will be four diffrent artificial data set generated. To do that it will be used diffrent matrix variance-covariance. For each of those there will be performed exponential transformation on the Z component.
-
-It will be shown:
+In this section we will perfome computetion to conform the describe above approach. For that purpose we have generated four diffrent data sets
+using correlation matrix. For each of those generated data sets we are adding a new data set where exponential transformation on the Z component
+has been applied. To present our findings we will have following for each generated dataset:
 
 1. Correlation matrix used to generate the data set.
 2. Transformation applied  to "Z" component.
@@ -148,7 +147,6 @@ It will be shown:
 4. 3D plot of data set and transformed data set.
 5. Correlation matrix for both data sets.
 6. Counts and respect probabilities for each direction for both data sets. 
-
 
 ### Data set 1 - Highly Correlated
 
