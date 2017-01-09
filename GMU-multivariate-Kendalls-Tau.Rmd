@@ -142,15 +142,15 @@ For that purpose there will be four diffrent artificial data set generated. To d
 
 It will be shown:
 
-1. Matrix Variance-Covariance used to generate the data set.
+1. Correlation matrix used to generate the data set.
 2. Transformation applied  to "Z" component.
 3. Scaterr plot ilustrating the generated data set and transformed data set.
 4. 3D plot of data set and transformed data set.
-5. Correlation Matrix for both data sets.
+5. Correlation matrix for both data sets.
 6. Counts and respect probabilities for each direction for both data sets. 
 
 
-# Data set 1
+### Data set 1 - Highly Correlated
 
 
 ```{r, echo=FALSE}
@@ -181,9 +181,10 @@ set.seed(1)
 random.normal = matrix(rnorm(nvars*numobs,0,1), nrow=nvars, ncol=numobs);
 X = U %*% random.normal
 newX = t(X)
+newXT = t(X)
 
 #Turn expotential transformation
-newX[,3] <- exp(newX[,3])
+newXT[,3] <- exp(newX[,3])
 
 #Ignore generated data and put hyperplane instead
 # newX[,1]<-seq(1:100)
@@ -192,19 +193,42 @@ newX[,3] <- exp(newX[,3])
 
 ```
 
-### Input Variance Covariance Matrix  
+### Input Correlation Matrix 
 
 ```{r, echo=FALSE}
-raw = as.data.frame(newX)
-orig.raw = as.data.frame(t(random.normal))
-names(raw) = c("X","Y","Z")
-cor(raw)
+R.df = as.data.frame(R)
+names(R.df) = c("X","Y","Z")
+R.df
 ```
 
-### Scatter plot
+### Scatter plot for generated data
 
 ```{r, echo=FALSE}
-plot(head(raw, numobs))
+newX.df = as.data.frame(newX)
+names(newX.df) = c("X","Y","Z")
+plot(head(newX.df, numobs), main="Data set scatterplot")
+```
+
+```{r, echo=FALSE}
+newXT.df = as.data.frame(newXT)
+names(newXT.df) = c("X","Y","Z")
+plot(head(newXT.df, numobs), main="Data set scatterplot with Z replaced by exp(Z)")
+```
+
+### 3D plot
+
+```{r, echo=FALSE}
+library(scatterplot3d)
+
+scatterplot3d(newX.df$X, newX.df$Y, newX.df$Z, highlight.3d=TRUE, xlab="X", ylab="Y", zlab="Z",
+ col.axis="blue", col.grid="lightblue",
+ main="Scatterplot3d - Data Set 1", pch=20)
+```
+
+```{r, echo=FALSE}
+scatterplot3d(newXT.df$X, newXT.df$Y, newXT.df$Z, highlight.3d=TRUE, xlab="X", ylab="Y", zlab="Z",
+ col.axis="blue", col.grid="lightblue",
+ main="Scatterplot3d - Data set with Z replaced by exp(Z)", pch=20)
 ```
 
 ```{r, echo=FALSE}
@@ -230,37 +254,11 @@ computeKendalProbVect <- function(newX) {
   return(qrtCount)
 }
 
-qrtCountNoTrnsf <- computeKendalProbVect(t(X))
-qrtCount <- computeKendalProbVect(newX)
+qrtCountNoTrnsf <- computeKendalProbVect(newX)
+qrtCount <- computeKendalProbVect(newXT)
 ```
 
-### Counts and Probabilities depending on the quarter with Transforamtion
-
-```{r, echo= FALSE}
-
-qrtProb = qrtCount/choose(numobs, 2)
-
-
-#Construct a matrix of Counts and Probabilities
-B=as.matrix=cbind(qrtCount,qrtProb)
-
-
-```
-
-```{r results='asis', echo=FALSE}
-df <- as.data.frame(t(B))
-names(df)[names(df) == 'V1'] <- paste(tail(rev(as.integer(intToBits(0))),2),collapse = "")
-names(df)[names(df) == 'V2'] <- paste(tail(rev(as.integer(intToBits(1))),2),collapse = "")
-names(df)[names(df) == 'V3'] <- paste(tail(rev(as.integer(intToBits(2))),2),collapse = "")
-names(df)[names(df) == 'V4'] <- paste(tail(rev(as.integer(intToBits(3))),2),collapse = "")
-
-
-library(knitr)
-out <- kable(df,format="markdown", align = 'c')
-cat(gsub('\\bNaN\\b', '  ', out), sep='\n')
-```
-
-### Counts and Probabilities depending on the quarter with noTransforamtion
+### Counts and Probabilities depending on the quarter for the data set
 
 ```{r, echo=FALSE}
 
@@ -268,6 +266,7 @@ qrtProbNoTrnsf = qrtCountNoTrnsf/choose(numobs, 2)
 
 #Construct a matrix of Counts and Probabilities
 C=as.matrix=cbind(qrtCountNoTrnsf,qrtProbNoTrnsf)
+colnames(C)<-c("Count per direction", "Probability per direction")
 ```
 
 
@@ -284,31 +283,21 @@ out <- kable(df,format="markdown", align = 'c')
 cat(gsub('\\bNaN\\b', '  ', out), sep='\n')
 ```
 
-### Correlation Matrix 
+### Counts and Probabilities depending on the quarter for the data set with Z replaced by exp(Z)
 
-```{r}
+```{r, echo= FALSE}
 
-cor(newX)
-cor(t(X))
+qrtProb = qrtCount/choose(numobs, 2)
 
-```
 
-### Tau matrix
+#Construct a matrix of Counts and Probabilities
+B=as.matrix=cbind(qrtCount,qrtProb)
+colnames(B)<-c("Count per direction", "Probability per direction")
 
-```{r, echo=FALSE}
-  tauMat <- matrix(NA, nrow = 2^(nvars-1), ncol = 2^(nvars-1))
-  for (i in 1:(2^(nvars-1))) {
-    for (j in 1:(2^(nvars-1))) {
-      if (qrtCount[i]+qrtCount[j] == 0)
-        tauMat[i,j] <- 0
-      else
-        tauMat[i,j] <- (qrtCount[i]-qrtCount[j])/(qrtCount[i]+qrtCount[j])
-    }
-  }
 ```
 
 ```{r results='asis', echo=FALSE}
-df <- as.data.frame(tauMat)
+df <- as.data.frame(t(B))
 names(df)[names(df) == 'V1'] <- paste(tail(rev(as.integer(intToBits(0))),2),collapse = "")
 names(df)[names(df) == 'V2'] <- paste(tail(rev(as.integer(intToBits(1))),2),collapse = "")
 names(df)[names(df) == 'V3'] <- paste(tail(rev(as.integer(intToBits(2))),2),collapse = "")
@@ -320,4 +309,471 @@ out <- kable(df,format="markdown", align = 'c')
 cat(gsub('\\bNaN\\b', '  ', out), sep='\n')
 ```
 
+```{r, echo=FALSE}
+print("Computed Pearson Correlation for the data set (no transformation)")
+cor(newX)
+```
+
+```{r, echo=FALSE}
+print("Computed Pearson Correlation for the data set with Z replaced by exp(Z)")
+cor(newXT)
+```
+
+As we can see the Counts and Probabilites computed for both data sets (with no transformation and with transformation) are 
+the same. However the computed with Pearson method correlation is lower for the data set where Z component has been replaced with exp(Z). 
+
+
+### Data set 2 - No correlated
+
+```{r, echo=FALSE}
+R = matrix(cbind(1.0000, 0.00, 0.00,
+                 0.00, 1.0000, 0.00,
+                 0.00, 0.00, 1.0000),
+           nrow=3)
+ 
+U = t(chol(R))
+nvars = dim(U)[1]
+numobs = 100
+set.seed(1)
+random.normal = matrix(rnorm(nvars*numobs,0,1), nrow=nvars, ncol=numobs);
+X = U %*% random.normal
+newX = t(X)
+newXT = t(X)
+
+#Turn expotential transformation
+newXT[,3] <- exp(newX[,3])
+
+#Ignore generated data and put hyperplane instead
+# newX[,1]<-seq(1:100)
+# newX[,2]<-(-seq(1:100))
+# newX[,3]<-seq(1:100)
+
+```
+
+### Input Correlation Matrix 
+
+```{r, echo=FALSE}
+R.df = as.data.frame(R)
+names(R.df) = c("X","Y","Z")
+R.df
+```
+
+### Scatter plot for generated data
+
+```{r, echo=FALSE}
+newX.df = as.data.frame(newX)
+names(newX.df) = c("X","Y","Z")
+plot(head(newX.df, numobs), main="Data set scatterplot")
+```
+
+```{r, echo=FALSE}
+newXT.df = as.data.frame(newXT)
+names(newXT.df) = c("X","Y","Z")
+plot(head(newXT.df, numobs), main="Data set scatterplot with Z replaced by exp(Z)")
+```
+
+### 3D plot
+
+```{r, echo=FALSE}
+library(scatterplot3d)
+
+scatterplot3d(newX.df$X, newX.df$Y, newX.df$Z, highlight.3d=TRUE, xlab="X", ylab="Y", zlab="Z",
+ col.axis="blue", col.grid="lightblue",
+ main="Scatterplot3d - Data Set 1", pch=20)
+```
+
+```{r, echo=FALSE}
+scatterplot3d(newXT.df$X, newXT.df$Y, newXT.df$Z, highlight.3d=TRUE, xlab="X", ylab="Y", zlab="Z",
+ col.axis="blue", col.grid="lightblue",
+ main="Scatterplot3d - Data set with Z replaced by exp(Z)", pch=20)
+```
+
+```{r, echo=FALSE}
+bintodec <- function(y) {
+  # find the decimal number corresponding to binary sequence 'y'
+  if (! (all(y %in% c(0,1)))) stop("not a binary sequence")
+  res <- sum(y*2^((length(y):1) - 1))
+  return(res)
+}
+
+computeKendalProbVect <- function(newX) {
+  qrtCount = rep(0, 2^(nvars-1))
+  for(i in 1:(numobs-1)) {
+    for(k in (i+1):numobs) {
+      dx =  newX[k,] - newX[i,]
+      p = as.integer(dx > 0)
+      if (p[1] == 1) 
+        p = (p != 1) ##Operation NOT to compute direction vs quarters (most significant bit is 0)
+      p = bintodec(p)
+      qrtCount[p+1] = qrtCount[p+1] + 1
+    }
+  }
+  return(qrtCount)
+}
+
+qrtCountNoTrnsf <- computeKendalProbVect(newX)
+qrtCount <- computeKendalProbVect(newXT)
+```
+
+### Counts and Probabilities depending on the quarter for the data set
+
+```{r, echo=FALSE}
+
+qrtProbNoTrnsf = qrtCountNoTrnsf/choose(numobs, 2)
+
+#Construct a matrix of Counts and Probabilities
+C=as.matrix=cbind(qrtCountNoTrnsf,qrtProbNoTrnsf)
+colnames(C)<-c("Count per direction", "Probability per direction")
+```
+
+
+```{r results='asis', echo=FALSE}
+df <- as.data.frame(t(C))
+names(df)[names(df) == 'V1'] <- paste(tail(rev(as.integer(intToBits(0))),2),collapse = "")
+names(df)[names(df) == 'V2'] <- paste(tail(rev(as.integer(intToBits(1))),2),collapse = "")
+names(df)[names(df) == 'V3'] <- paste(tail(rev(as.integer(intToBits(2))),2),collapse = "")
+names(df)[names(df) == 'V4'] <- paste(tail(rev(as.integer(intToBits(3))),2),collapse = "")
+
+
+library(knitr)
+out <- kable(df,format="markdown", align = 'c')
+cat(gsub('\\bNaN\\b', '  ', out), sep='\n')
+```
+
+### Counts and Probabilities depending on the quarter for the data set with Z replaced by exp(Z)
+
+```{r, echo= FALSE}
+
+qrtProb = qrtCount/choose(numobs, 2)
+
+
+#Construct a matrix of Counts and Probabilities
+B=as.matrix=cbind(qrtCount,qrtProb)
+colnames(B)<-c("Count per direction", "Probability per direction")
+
+```
+
+```{r results='asis', echo=FALSE}
+df <- as.data.frame(t(B))
+names(df)[names(df) == 'V1'] <- paste(tail(rev(as.integer(intToBits(0))),2),collapse = "")
+names(df)[names(df) == 'V2'] <- paste(tail(rev(as.integer(intToBits(1))),2),collapse = "")
+names(df)[names(df) == 'V3'] <- paste(tail(rev(as.integer(intToBits(2))),2),collapse = "")
+names(df)[names(df) == 'V4'] <- paste(tail(rev(as.integer(intToBits(3))),2),collapse = "")
+
+
+library(knitr)
+out <- kable(df,format="markdown", align = 'c')
+cat(gsub('\\bNaN\\b', '  ', out), sep='\n')
+```
+
+```{r, echo=FALSE}
+print("Computed Pearson Correlation for the data set (no transformation)")
+cor(newX)
+```
+
+```{r, echo=FALSE}
+print("Computed Pearson Correlation for the data set with Z replaced by exp(Z)")
+cor(newXT)
+```
+
+As we can see the Counts and Probabilites computed for both data sets (with no transformation and with transformation) are 
+the same. However the computed with Pearson method correlation is lower for the data set where Z component has been replaced with exp(Z). Also we can observed that respective probabilites for each direction are almost equal. This fact conforms with 
+our intuition that for the uncorrelated data set any given direction is equally likely to occur.
+
+
+### Data Set 3 - Perfect Correlation
+
+```{r, echo=FALSE}
+X1 = newX
+X1[,1]<-seq(from=0.1, to=10, by = 0.1)
+X1[,2]<-seq(from=0.1, to=10, by = 0.1)
+X1[,3]<-seq(from=0.1, to=10, by = 0.1)
+ 
+newX = X1
+newXT = X1
+
+#Turn expotential transformation
+newXT[,3] <- exp(newX[,3])
+```
+
+### Input Correlation Matrix 
+
+```{r, echo=FALSE}
+R.df = as.data.frame(R)
+names(R.df) = c("X","Y","Z")
+R.df
+```
+
+### Scatter plot for generated data
+
+```{r, echo=FALSE}
+newX.df = as.data.frame(newX)
+names(newX.df) = c("X","Y","Z")
+plot(head(newX.df, numobs), main="Data set scatterplot")
+```
+
+```{r, echo=FALSE}
+newXT.df = as.data.frame(newXT)
+names(newXT.df) = c("X","Y","Z")
+plot(head(newXT.df, numobs), main="Data set scatterplot with Z replaced by exp(Z)")
+```
+
+### 3D plot
+
+```{r, echo=FALSE}
+library(scatterplot3d)
+
+scatterplot3d(newX.df$X, newX.df$Y, newX.df$Z, highlight.3d=TRUE, xlab="X", ylab="Y", zlab="Z",
+ col.axis="blue", col.grid="lightblue",
+ main="Scatterplot3d - Data Set 1", pch=20)
+```
+
+```{r, echo=FALSE}
+scatterplot3d(newXT.df$X, newXT.df$Y, newXT.df$Z, highlight.3d=TRUE, xlab="X", ylab="Y", zlab="Z",
+ col.axis="blue", col.grid="lightblue",
+ main="Scatterplot3d - Data set with Z replaced by exp(Z)", pch=20)
+```
+
+```{r, echo=FALSE}
+bintodec <- function(y) {
+  # find the decimal number corresponding to binary sequence 'y'
+  if (! (all(y %in% c(0,1)))) stop("not a binary sequence")
+  res <- sum(y*2^((length(y):1) - 1))
+  return(res)
+}
+
+computeKendalProbVect <- function(newX) {
+  qrtCount = rep(0, 2^(nvars-1))
+  for(i in 1:(numobs-1)) {
+    for(k in (i+1):numobs) {
+      dx =  newX[k,] - newX[i,]
+      p = as.integer(dx > 0)
+      if (p[1] == 1) 
+        p = (p != 1) ##Operation NOT to compute direction vs quarters (most significant bit is 0)
+      p = bintodec(p)
+      qrtCount[p+1] = qrtCount[p+1] + 1
+    }
+  }
+  return(qrtCount)
+}
+
+qrtCountNoTrnsf <- computeKendalProbVect(newX)
+qrtCount <- computeKendalProbVect(newXT)
+```
+
+### Counts and Probabilities depending on the quarter for the data set
+
+```{r, echo=FALSE}
+
+qrtProbNoTrnsf = qrtCountNoTrnsf/choose(numobs, 2)
+
+#Construct a matrix of Counts and Probabilities
+C=as.matrix=cbind(qrtCountNoTrnsf,qrtProbNoTrnsf)
+colnames(C)<-c("Count per direction", "Probability per direction")
+```
+
+
+```{r results='asis', echo=FALSE}
+df <- as.data.frame(t(C))
+names(df)[names(df) == 'V1'] <- paste(tail(rev(as.integer(intToBits(0))),2),collapse = "")
+names(df)[names(df) == 'V2'] <- paste(tail(rev(as.integer(intToBits(1))),2),collapse = "")
+names(df)[names(df) == 'V3'] <- paste(tail(rev(as.integer(intToBits(2))),2),collapse = "")
+names(df)[names(df) == 'V4'] <- paste(tail(rev(as.integer(intToBits(3))),2),collapse = "")
+
+
+library(knitr)
+out <- kable(df,format="markdown", align = 'c')
+cat(gsub('\\bNaN\\b', '  ', out), sep='\n')
+```
+
+### Counts and Probabilities depending on the quarter for the data set with Z replaced by exp(Z)
+
+```{r, echo= FALSE}
+
+qrtProb = qrtCount/choose(numobs, 2)
+
+
+#Construct a matrix of Counts and Probabilities
+B=as.matrix=cbind(qrtCount,qrtProb)
+colnames(B)<-c("Count per direction", "Probability per direction")
+
+```
+
+```{r results='asis', echo=FALSE}
+df <- as.data.frame(t(B))
+names(df)[names(df) == 'V1'] <- paste(tail(rev(as.integer(intToBits(0))),2),collapse = "")
+names(df)[names(df) == 'V2'] <- paste(tail(rev(as.integer(intToBits(1))),2),collapse = "")
+names(df)[names(df) == 'V3'] <- paste(tail(rev(as.integer(intToBits(2))),2),collapse = "")
+names(df)[names(df) == 'V4'] <- paste(tail(rev(as.integer(intToBits(3))),2),collapse = "")
+
+
+library(knitr)
+out <- kable(df,format="markdown", align = 'c')
+cat(gsub('\\bNaN\\b', '  ', out), sep='\n')
+```
+
+```{r, echo=FALSE}
+print("Computed Pearson Correlation for the data set (no transformation)")
+cor(newX)
+```
+
+```{r, echo=FALSE}
+print("Computed Pearson Correlation for the data set with Z replaced by exp(Z)")
+cor(newXT)
+```
+
+As we can see the Counts and Probabilites computed for both data sets (with no transformation and with transformation) are 
+the same. However the computed with Pearson method correlation is lower for the data set where Z component has been replaced with exp(Z). We can also observerd that only one direction is possible for this data set since the probability is equal 1 for one direction and 0 for all others.
+
+
+#Appendix A - Source code for RStudio
+
+
+### Data set 1 - Correlation between variables "X" and "Z"
+
+
+```{r}
+
+R = matrix(cbind(1.000000, 0.1121, 0.851929,
+                 0.112100, 1.0000, 0.140000,
+                 0.851929, 0.1400, 1.000000),
+           nrow=3)
+
+U = t(chol(R))
+nvars = dim(U)[1]
+numobs = 100
+set.seed(1)
+random.normal = matrix(rnorm(nvars*numobs,0,1), nrow=nvars, ncol=numobs);
+X = U %*% random.normal
+newX = t(X)
+newXT = t(X)
+
+newXT[,3] <- exp(newX[,3])
+```
+
+### Input Correlation Matrix 
+
+```{r}
+R.df = as.data.frame(R)
+names(R.df) = c("X","Y","Z")
+R.df
+```
+
+### Scatter plot for generated data
+
+```{r}
+newX.df = as.data.frame(newX)
+names(newX.df) = c("X","Y","Z")
+plot(head(newX.df, numobs), main="Data set scatterplot")
+```
+
+```{r}
+newXT.df = as.data.frame(newXT)
+names(newXT.df) = c("X","Y","Z")
+plot(head(newXT.df, numobs), main="Data set scatterplot with Z replaced by exp(Z)")
+```
+
+### 3D plot
+
+```{r}
+library(scatterplot3d)
+
+scatterplot3d(newX.df$X, newX.df$Y, newX.df$Z, highlight.3d=TRUE, xlab="X", ylab="Y", zlab="Z",
+ col.axis="blue", col.grid="lightblue",
+ main="Scatterplot3d - Data Set 1", pch=20)
+```
+
+```{r}
+scatterplot3d(newXT.df$X, newXT.df$Y, newXT.df$Z, highlight.3d=TRUE, xlab="X", ylab="Y", zlab="Z",
+ col.axis="blue", col.grid="lightblue",
+ main="Scatterplot3d - Data set with Z replaced by exp(Z)", pch=20)
+```
+
+```{r}
+bintodec <- function(y) {
+  # find the decimal number corresponding to binary sequence 'y'
+  if (! (all(y %in% c(0,1)))) stop("not a binary sequence")
+  res <- sum(y*2^((length(y):1) - 1))
+  return(res)
+}
+
+computeKendalProbVect <- function(newX) {
+  qrtCount = rep(0, 2^(nvars-1))
+  for(i in 1:(numobs-1)) {
+    for(k in (i+1):numobs) {
+      dx =  newX[k,] - newX[i,]
+      p = as.integer(dx > 0)
+      if (p[1] == 1) 
+        p = (p != 1) ##Operation NOT to compute direction vs quarters (most significant bit is 0)
+      p = bintodec(p)
+      qrtCount[p+1] = qrtCount[p+1] + 1
+    }
+  }
+  return(qrtCount)
+}
+
+qrtCountNoTrnsf <- computeKendalProbVect(newX)
+qrtCount <- computeKendalProbVect(newXT)
+```
+
+### Counts and Probabilities depending on the quarter for the data set
+
+```{r}
+
+qrtProbNoTrnsf = qrtCountNoTrnsf/choose(numobs, 2)
+
+#Construct a matrix of Counts and Probabilities
+C=as.matrix=cbind(qrtCountNoTrnsf,qrtProbNoTrnsf)
+colnames(C)<-c("Count per direction", "Probability per direction")
+```
+
+
+```{r results='asis'}
+df <- as.data.frame(t(C))
+names(df)[names(df) == 'V1'] <- paste(tail(rev(as.integer(intToBits(0))),2),collapse = "")
+names(df)[names(df) == 'V2'] <- paste(tail(rev(as.integer(intToBits(1))),2),collapse = "")
+names(df)[names(df) == 'V3'] <- paste(tail(rev(as.integer(intToBits(2))),2),collapse = "")
+names(df)[names(df) == 'V4'] <- paste(tail(rev(as.integer(intToBits(3))),2),collapse = "")
+
+
+library(knitr)
+out <- kable(df,format="markdown", align = 'c')
+cat(gsub('\\bNaN\\b', '  ', out), sep='\n')
+```
+
+### Counts and Probabilities depending on the quarter for the data set with Z replaced by exp(Z)
+
+```{r}
+
+qrtProb = qrtCount/choose(numobs, 2)
+
+
+#Construct a matrix of Counts and Probabilities
+B=as.matrix=cbind(qrtCount,qrtProb)
+colnames(B)<-c("Count per direction", "Probability per direction")
+
+```
+
+```{r results='asis'}
+df <- as.data.frame(t(B))
+names(df)[names(df) == 'V1'] <- paste(tail(rev(as.integer(intToBits(0))),2),collapse = "")
+names(df)[names(df) == 'V2'] <- paste(tail(rev(as.integer(intToBits(1))),2),collapse = "")
+names(df)[names(df) == 'V3'] <- paste(tail(rev(as.integer(intToBits(2))),2),collapse = "")
+names(df)[names(df) == 'V4'] <- paste(tail(rev(as.integer(intToBits(3))),2),collapse = "")
+
+
+library(knitr)
+out <- kable(df,format="markdown", align = 'c')
+cat(gsub('\\bNaN\\b', '  ', out), sep='\n')
+```
+
+```{r}
+print("Computed Pearson Correlation for the data set (no transformation)")
+cor(newX)
+```
+
+```{r}
+print("Computed Pearson Correlation for the data set with Z replaced by exp(Z)")
+cor(newXT)
+```
 
