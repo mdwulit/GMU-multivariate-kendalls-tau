@@ -321,7 +321,7 @@ As we can see the Counts and Probabilites computed for both data sets (with no t
 the same. However the computed with Pearson method correlation is lower for the data set where Z component has been replaced with exp(Z). 
 
 
-### Data set 2 - No correlated
+### Data set 2 - No correlation
 
 ```{r, echo=FALSE}
 R = matrix(cbind(1.0000, 0.00, 0.00,
