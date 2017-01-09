@@ -1,5 +1,5 @@
 ---
-title: "Multivariate Kendal's Tau"
+title: "Measure of association between multiple variables"
 author: 
   - Marek Dwulit
   - Magdalena Dwulit
@@ -8,7 +8,7 @@ abstract: |
   In general, if $X$ and $Y$ bivariate probability distribution, the covariance is a one parameter which 
   indicates the amount of association between variable $X$ and variable $Y$. The covariance will be high
   and positive where there is hihgh probability that high values of $X$ are associated with high values
-  of $Y$ and low values of $X$ are associated with low values of $Y$. On the other hand the if the 
+  of $Y$ and low values of $X$ are associated with low values of $Y$. On the other hand, if the 
   association is negative (high values of $X$ correspond to low values of $Y$ and low values of $X$ 
   correspond to high values of $Y) the correlation will be large and negative.
   
@@ -18,8 +18,8 @@ abstract: |
   At the end of computation our method produces a vector of probabilites for eqch direction in multidimensional space.
   
   Finally this is a beggining of the work and the review is needed to established fisibility of proposed approach.
-  Based of the outcome further effor will be provided to better define concept and polish the text. As of right now this
-  document caputers more intuitive representation than formalized concepts.
+  Based of the outcome further effor will be provided to better define concept and polish the text. In the current state
+  this document captuers has intuitive representation rather than formalized concepts.
 
 
 output: pdf_document
@@ -34,7 +34,7 @@ further work is needed to extend presented below concept in order to account for
 ### Quarter Indexing 
 
 Lets assume that we have a one dimensional space. Graphically we can represent it as a line with defined 0.
-We have two halves and we can use binary system to indicate each half. Positive numbers are indicated by 1 and
+We have two halves and we can use binary system to indicate each halve. Positive numbers are indicated by 1 and
 negative numbers are indicated by 0. 
 
 ```{r, out.width = "200px", echo=FALSE}
@@ -48,7 +48,7 @@ numbers to index all quarters.
 knitr::include_graphics("Images/binary-two-dimension.png")
 ```
 
-In the case of three dimensional space we have eight "quarters" and we can index all quarters with three binary numbers.
+In the case of the three dimensional space we have eight "quarters" and we can index all quarters with three binary numbers.
 
 ```{r, out.width = "200px", echo=FALSE}
 knitr::include_graphics("Images/binary-three-dimension.png")
@@ -61,6 +61,8 @@ $d$ dimensial space. It is worth to notice that the index starts from 0 and ends
 
 Furthermore it is important to notice that for each "quarter", there is an oposite "quarter"" indicated by the oposite vector
 to a vector indicating point in a given quarter. By the nature of the binary indexing we can find the oposite quarter by performing the NOT operation on binary sequence indicating a given quarter. For a quarter marked by binary sequence $111$ (7 as an integer) the oposite quarter has index $000$ (0 as an integer).
+
+For the sake of simplicity we will refer to the two oposite quarters as a direction. So in $d$ dimensional space we have $2^{d-1}$ directions as per each direction we need two quarters. 
 
 ```{r, out.width = "200px", echo=FALSE}
 knitr::include_graphics("Images/binary-three-dimension-oposite-qtr.png")
@@ -115,8 +117,6 @@ $$
 $$ 
 
 To see how we can use quarter concept to estimate T, we have to recognize the fact that the formula nr 1 returns 1 for quarters 0 (00) and 3 (11) and returns -1 for quarters 1 (01) and 2 (10). Therefore we can interpret the nominator from the formula number (3) as a difference out of all possible pairs of points, between number pairs having other point in quarters 0 or 3, and pairs having other point in quarter 1 or 2. 
-
-For the sake of simplicity we will refer to the two oposite quarters as a direction. So in $d$ dimensional space we have $2^{d-1}$ directions as per each direction we need two quarters. 
 
 ### Short discussion
 
