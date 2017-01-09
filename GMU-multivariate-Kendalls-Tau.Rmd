@@ -1,5 +1,9 @@
 ---
+<<<<<<< HEAD
 title: "Measure of association between multiple variables"
+=======
+title: "An attempt to measure association between variables in multivariate distribution"
+>>>>>>> 2b8adbe0956e5363aef5d91a5f2648cf798bcf9e
 author: 
   - Marek Dwulit
   - Magdalena Dwulit
@@ -18,8 +22,14 @@ abstract: |
   At the end of computation our method produces a vector of probabilites for eqch direction in multidimensional space.
   
   Finally this is a beggining of the work and the review is needed to established fisibility of proposed approach.
+<<<<<<< HEAD
   Based of the outcome further effor will be provided to better define concept and polish the text. In the current state
   this document captuers has intuitive representation rather than formalized concepts.
+=======
+  Based of the outcome further effor will be provided to better define concept and polish the text. In current form this
+  document caputers more intuitive representation than formalized concepts. The main feature worth focus is 
+  consideration of a given dataset in terms of "quarters" (term define in the article) instead of random variables.
+>>>>>>> 2b8adbe0956e5363aef5d91a5f2648cf798bcf9e
 
 
 output: pdf_document
